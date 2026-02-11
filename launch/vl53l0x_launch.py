@@ -1,3 +1,8 @@
+# Copyright 2025 The vl53l0x_range Authors
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
 """Launch file for vl53l0x_range package."""
 
 import os
@@ -10,6 +15,7 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
+    """Generate launch description for VL53L0X range node."""
     pkg_dir = get_package_share_directory('vl53l0x_range')
     default_params = os.path.join(pkg_dir, 'config', 'vl53l0x_params.yaml')
 

@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
+# Copyright 2025 The vl53l0x_range Authors
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
 """ROS2 node that reads VL53L0X over I2C and publishes sensor_msgs/Range."""
 
 import time
 
+from rcl_interfaces.msg import SetParametersResult
 import rclpy
 from rclpy.node import Node
-from rcl_interfaces.msg import SetParametersResult
 from sensor_msgs.msg import Range
 from std_srvs.srv import Trigger
 
-from vl53l0x_range.vl53l0x_driver import VL53L0XDriver, FakeVL53L0XDriver
+from vl53l0x_range.vl53l0x_driver import FakeVL53L0XDriver, VL53L0XDriver
 
 
 class VL53L0XRangeNode(Node):
+    """ROS2 node for VL53L0X time-of-flight range sensor."""
+
     def __init__(self):
         super().__init__('vl53l0x_range_node')
 
@@ -28,15 +35,15 @@ class VL53L0XRangeNode(Node):
         self.declare_parameter('max_range', 2.0)
 
         # ── Read parameters ───────────────────────────────────────
-        self.fake_mode  = self.get_parameter('fake_mode').value
-        self.bus_num    = self.get_parameter('i2c_bus').value
-        self.address    = self.get_parameter('device_address').value
-        rate            = self.get_parameter('publish_rate').value
-        self.frame_id   = self.get_parameter('frame_id').value
+        self.fake_mode = self.get_parameter('fake_mode').value
+        self.bus_num = self.get_parameter('i2c_bus').value
+        self.address = self.get_parameter('device_address').value
+        rate = self.get_parameter('publish_rate').value
+        self.frame_id = self.get_parameter('frame_id').value
         self.range_mode = self.get_parameter('range_mode').value
-        self.fov        = self.get_parameter('field_of_view').value
-        self.min_range  = self.get_parameter('min_range').value
-        self.max_range  = self.get_parameter('max_range').value
+        self.fov = self.get_parameter('field_of_view').value
+        self.min_range = self.get_parameter('min_range').value
+        self.max_range = self.get_parameter('max_range').value
 
         # ── Range offset bias (set by calibration) ────────────────
         self.range_bias_mm = 0
@@ -166,6 +173,7 @@ class VL53L0XRangeNode(Node):
 
 
 def main(args=None):
+    """Run the VL53L0X range node."""
     rclpy.init(args=args)
     node = VL53L0XRangeNode()
     try:
@@ -175,7 +183,10 @@ def main(args=None):
     finally:
         node.driver.close()
         node.destroy_node()
-        rclpy.shutdown()
+        try:
+            rclpy.shutdown()
+        except Exception:
+            pass
 
 
 if __name__ == '__main__':

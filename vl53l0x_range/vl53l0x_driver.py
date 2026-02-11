@@ -1,3 +1,8 @@
+# Copyright 2025 The vl53l0x_range Authors
+#
+# Use of this source code is governed by an MIT-style
+# license that can be found in the LICENSE file or at
+# https://opensource.org/licenses/MIT.
 """VL53L0X I2C Driver - Time-of-Flight laser distance sensor."""
 
 import random
@@ -18,40 +23,38 @@ class FakeVL53L0XDriver:
         return int(self._base * 1000 + random.gauss(0.0, 5.0))
 
     def model_id(self) -> int:
+        """Return fake model ID."""
         return 0xEE
 
     def set_range_mode(self, mode: str):
+        """Set range mode (no-op in fake mode)."""
         pass
 
     def close(self):
+        """Close driver (no-op in fake mode)."""
         pass
 
 
 class VL53L0XDriver:
-    """Low-level I2C driver for ST VL53L0X.
-
-    Datasheet: VL53L0X (ST DocID029104)
-    Uses simplified register-level access based on the ST API reference
-    and Pololu VL53L0X library.
-    """
+    """Low-level I2C driver for ST VL53L0X."""
 
     # ── Register Map ──────────────────────────────────────────────
-    REG_SYSRANGE_START                = 0x00
-    REG_SYSTEM_SEQUENCE_CONFIG        = 0x01
-    REG_SYSTEM_INTERRUPT_CONFIG_GPIO  = 0x0A
-    REG_SYSTEM_INTERRUPT_CLEAR        = 0x0B
-    REG_RESULT_INTERRUPT_STATUS       = 0x13
-    REG_RESULT_RANGE_STATUS           = 0x14
-    REG_MSRC_CONFIG_CONTROL           = 0x60
-    REG_VHV_CONFIG_PAD_SCL_SDA        = 0x89
-    REG_FINAL_RANGE_CONFIG_MIN_COUNT  = 0x44
-    REG_MODEL_ID                      = 0xC0   # should read 0xEE
+    REG_SYSRANGE_START = 0x00
+    REG_SYSTEM_SEQUENCE_CONFIG = 0x01
+    REG_SYSTEM_INTERRUPT_CONFIG_GPIO = 0x0A
+    REG_SYSTEM_INTERRUPT_CLEAR = 0x0B
+    REG_RESULT_INTERRUPT_STATUS = 0x13
+    REG_RESULT_RANGE_STATUS = 0x14
+    REG_MSRC_CONFIG_CONTROL = 0x60
+    REG_VHV_CONFIG_PAD_SCL_SDA = 0x89
+    REG_FINAL_RANGE_CONFIG_MIN_COUNT = 0x44
+    REG_MODEL_ID = 0xC0  # should read 0xEE
 
-    # ── Timing budget presets (µs) ───────────────────────────────
+    # ── Timing budget presets (us) ───────────────────────────────
     TIMING_BUDGET = {
-        'short':  20000,    # ~1.2 m, high accuracy
-        'medium': 33000,    # ~1.5 m, balanced (default)
-        'long':   200000,   # ~2.0 m, max range
+        'short': 20000,    # ~1.2 m, high accuracy
+        'medium': 33000,   # ~1.5 m, balanced (default)
+        'long': 200000,    # ~2.0 m, max range
     }
 
     def __init__(self, bus: int = 1, address: int = 0x29,
@@ -131,11 +134,7 @@ class VL53L0XDriver:
 
     # ── Single-shot ranging ──────────────────────────────────────
     def read_range_mm(self) -> int:
-        """Perform single-shot range measurement.
-
-        Returns:
-            distance in millimetres (0 or 8190 indicates error/out-of-range)
-        """
+        """Perform single-shot range measurement, returning distance in mm."""
         # Start single-shot measurement
         self._write_reg(0x80, 0x01)
         self._write_reg(0xFF, 0x01)
@@ -174,4 +173,5 @@ class VL53L0XDriver:
         return self._read_reg(self.REG_MODEL_ID)
 
     def close(self):
+        """Close the I2C bus."""
         self.bus.close()
